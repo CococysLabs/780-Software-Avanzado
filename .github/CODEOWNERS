@@ -1,5 +1,18 @@
+# ==========================================
 # Carpetas restringidas de semestres anteriores
-/Ciclo-2026-Primer-Semestre/@Cococys
+# ==========================================
 
-# Carpeta del semestre en curso
-/Ciclo-2026-Segundo-Semestre/Ejemplos/@CococysLabs/team_780_sa
+/Ciclo-2024-Segundo-Semestre/ @Cococys
+
+/Ciclo-2025-Primer-Semestre/Contenido/ @Cococys
+
+/Ciclo-2025-Segundo-Semestre/Contenido/ @Cococys
+
+/Ciclo-2026-Primer-Semestre/ @Cococys
+
+
+# ==========================================
+# Semestre en curso
+# ==========================================
+
+/Ciclo-2026-Segundo-Semestre/Ejemplos/ @CococysLabs/team_780_sa
