@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tienda
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pg-credenciales
+  namespace: tienda
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: demo1234
+  POSTGRES_DB: tienda
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: datos-postgres
+  namespace: tienda
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: tienda
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app: postgres }
+  template:
+    metadata:
+      labels: { app: postgres }
+      annotations:
+        # Hooks de Velero: vuelca la base ANTES de copiar el volumen.
+        # Sin esto el respaldo copia archivos de una base que esta escribiendo:
+        # se reporta exitoso y puede ser inservible.
+        pre.hook.backup.velero.io/container: postgres
+        pre.hook.backup.velero.io/command: '["/bin/sh","-c","pg_dump -U postgres tienda > /var/lib/postgresql/data/respaldo.sql"]'
+        pre.hook.backup.velero.io/timeout: 120s
+        backup.velero.io/backup-volumes: datos
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef: { name: pg-credenciales }
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports: [{ containerPort: 5432 }]
+          volumeMounts:
+            - name: datos
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits:   { cpu: 500m, memory: 512Mi }
+      volumes:
+        - name: datos
+          persistentVolumeClaim: { claimName: datos-postgres }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: tienda
+spec:
+  selector: { app: postgres }
+  ports: [{ port: 5432, targetPort: 5432 }]

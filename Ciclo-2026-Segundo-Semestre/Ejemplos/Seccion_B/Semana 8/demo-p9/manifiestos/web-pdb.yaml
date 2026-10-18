@@ -1,0 +1,53 @@
+# Servicio web de 4 replicas para la prueba de perdida de nodo.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: tienda
+spec:
+  replicas: 4
+  selector:
+    matchLabels: { app: web }
+  template:
+    metadata:
+      labels: { app: web }
+    spec:
+      # Reparte las replicas entre nodos: si se pierde uno, sobreviven las otras.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { app: web }
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 80 }]
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            periodSeconds: 3
+          resources:
+            requests: { cpu: 20m, memory: 32Mi }
+            limits:   { cpu: 200m, memory: 128Mi }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web
+  namespace: tienda
+spec:
+  # Kubernetes NO desalojara pods si eso deja menos de 3 disponibles.
+  minAvailable: 3
+  selector:
+    matchLabels: { app: web }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: tienda
+spec:
+  type: NodePort
+  selector: { app: web }
+  ports: [{ port: 80, targetPort: 80, nodePort: 30080 }]
