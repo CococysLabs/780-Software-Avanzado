@@ -1,0 +1,12 @@
+# Respaldo programado con retencion declarada.
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: tienda-diario
+  namespace: velero
+spec:
+  schedule: "*/10 * * * *"   # cada 10 minutos: para clase. En produccion, diario.
+  template:
+    includedNamespaces: [tienda]
+    defaultVolumesToFsBackup: true
+    ttl: 24h0m0s             # politica de retencion

@@ -1,0 +1,25 @@
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+
+@Entity('Users')
+export class User {
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
+    @Column('text', { unique: true })
+    email: string;
+
+    @Column('text')
+    password: string;
+
+    @Column('text')
+    fullname: string;
+
+    @Column('bool', { default: true })
+    isActive: boolean;
+
+    @Column('text', {
+        array: true,
+        default: ['user']
+    })
+    rols: string[];
+
+}

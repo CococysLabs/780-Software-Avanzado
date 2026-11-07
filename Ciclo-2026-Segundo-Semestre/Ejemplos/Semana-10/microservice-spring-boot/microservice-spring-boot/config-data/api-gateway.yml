@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: api-gateway
+
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/ecommerce-realm
+        registration:
+          api-gateway-client:
+            provider: keycloak
+            client-id: api-gateway-client
+            client-secret: WhjaVxLZcQxN03SsqS8lte3lrmNFxqj4
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+            scope: openid
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/ecommerce-realm
+
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay
+      routes:
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/product/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/v1/order/**
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/v1/inventory/**
+
+# ✅ CONFIGURACIÓN DE OBSERVABILIDAD UNIFICADA (Traces, Logs y Metrics)
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # Captura el 100% de las trazas para la prueba
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/traces # Endpoint HTTP OTLP
+    logging:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/logs # Habilita el envío de logs a Grafana
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics # Habilita el envío de métricas a Grafana
+  endpoints:
+    web:
+      exposure:
+        include: "refresh, health, prometheus"
+
+# ✅ CORRELACIÓN DE LOGS EN CONSOLA (Para ver el TraceID localmente)
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{trace_id:-},%X{span_id:-}]" #
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+server:
+  port: 9000

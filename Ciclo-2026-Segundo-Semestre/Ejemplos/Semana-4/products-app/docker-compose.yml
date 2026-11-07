@@ -1,0 +1,46 @@
+services:
+
+  nats-server:
+    image: nats:latest
+    ports:
+      - "8222:8222"
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - 3000:3000
+    volumes:
+      - ./api-gateway/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=3000
+      - NATS_SERVERS=nats://nats-server:4222
+
+  products-ms:
+    build: ./products-ms
+    volumes:
+      - ./products-ms/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=3001
+      - NATS_SERVERS=nats://nats-server:4222
+      - DB_HOST_USER=ep-hidden-tree-ai9fbcmc-pooler.c-4.us-east-1.aws.neon.tech
+      - DB_PORT=5432
+      - DB_USER=neondb_owner
+      - DB_PW=npg_sW29VFYBJRQD
+      - DB_NAME=neondb
+
+  auth-ms:
+    build: ./auth
+    volumes:
+      - ./auth/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+    - PORT=3002
+    - NATS_SERVERS=nats://nats-server:4222
+    - DB_HOST_USER=ep-shiny-bird-airid6as-pooler.c-4.us-east-1.aws.neon.tech
+    - DB_PORT=5432
+    - DB_USER=neondb_owner
+    - DB_PW=npg_gwrJNzHR7bs4
+    - DB_NAME=neondb
+    - JWT_SECRET=your_jwt_secret_key

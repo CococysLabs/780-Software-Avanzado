@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="InventoryServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" singleton="false" nameIsGenerated="true">
+    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode" />
+    <module name="inventory-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.ecommerce.inventory_service.InventoryServiceApplication" />
+    <option name="VM_PARAMETERS" value="-Dserver.port=0 -Deureka.instance.instance-id=${spring.application.name}:${random.uuid}" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.ecommerce.inventory_service.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

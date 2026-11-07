@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: product-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    org.springframework.boot.autoconfigure.mongo: DEBUG
